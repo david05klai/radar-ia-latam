@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import {getCollection,render} from 'astro:content';
+export async function getStaticPaths(){return (await getCollection('posts')).map(post=>({params:{slug:post.id},props:{post}}));}
+const {post}=Astro.props;
+const {Content}=await render(post);
+const canonical=new URL(`/blog/${post.id}/`,Astro.site).href;
+const d=post.data;
+---
+<Base title={d.title} description={d.description} canonical={canonical} jsonld={{'@context':'https://schema.org','@type':'BlogPosting',headline:d.title,description:d.description,datePublished:d.pubDate.toISOString(),dateModified:d.verifiedAt,mainEntityOfPage:canonical,inLanguage:'es-CO',author:{'@type':'Organization',name:'Radar IA Latam'}}}><article class="prose"><p class="meta">{d.kind==='guia'?'Guía':'Novedad'} · Publicado {d.pubDate.toLocaleDateString('es-CO',{timeZone:'UTC'})} · Verificado {d.verifiedAt.slice(0,10)}</p><h1>{d.title}</h1><p class="standfirst">{d.description}</p><Content/><hr/><p class="meta">Fuente oficial: <a href={d.sourceUrl} rel="noopener noreferrer">{d.sourceUrl}</a><br/>Fecha de la fuente: {d.sourceDate}. Las condiciones pueden cambiar.</p></article></Base>
+

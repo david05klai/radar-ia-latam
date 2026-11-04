@@ -1,0 +1,1 @@
+{"name":"radar-ia-latam","private":true,"type":"module","scripts":{"dev":"astro dev","build":"astro build","preview":"astro preview","daily":"python scripts/daily.py","check":"python scripts/validate.py"},"dependencies":{"@astrojs/sitemap":"^3.7.4","astro":"^7.4.5"}}

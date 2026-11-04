@@ -1,0 +1,50 @@
+name: Publicación diaria
+on:
+  schedule:
+    - cron: '20 13 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: daily-content
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.txt
+      - run: python scripts/daily.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash-lite' }}
+      - run: python scripts/validate.py
+      - run: npm ci && npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+      - name: Guardar publicación validada
+        id: commit
+        run: |
+          if git diff --quiet -- src/content/posts && [ -z "$(git ls-files --others --exclude-standard src/content/posts)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "radar-ia-bot"
+          git config user.email "radar-ia-bot@users.noreply.github.com"
+          git add src/content/posts
+          git commit -m "Publicar novedad verificada"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Preparar difusión en canal propio (Telegram opcional)
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/share.py

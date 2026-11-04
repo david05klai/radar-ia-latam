@@ -1,0 +1,6 @@
+---
+import Base from '../layouts/Base.astro';
+const canonical=new URL('/acerca/',Astro.site).href;
+---
+<Base title="Acerca de y política editorial" description="Cómo verificamos, publicamos y corregimos información sobre herramientas de IA." canonical={canonical} jsonld={{'@context':'https://schema.org','@type':'AboutPage',url:canonical,inLanguage:'es-CO'}}><article class="prose"><h1>Acerca de</h1><p>Radar IA Latam resume cambios documentados por proveedores oficiales. Cada novedad enlaza su fuente, registra fecha y pasa filtros automáticos. Si falta evidencia, no se publica.</p><p>“Gratis” puede tener límites, requisitos de cuenta o disponibilidad regional. Verifica siempre la página oficial antes de tomar una decisión. No damos garantías de acceso en Colombia ni de duración de una oferta.</p><p>El proyecto no compra tráfico, no publica reseñas fingidas y no muestra anuncios actualmente. Las correcciones se hacen en el repositorio público del sitio.</p></article></Base>
+
